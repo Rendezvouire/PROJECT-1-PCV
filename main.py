@@ -22,7 +22,6 @@ def main():
 
         centroid, mask = hand_recognition(frame)
 
-        # Gambar garis & teks zona
         cv2.line(frame, (mid_x, 0), (mid_x, h), (255, 255, 255), 2)
         cv2.line(frame, (0, mid_y), (w, mid_y), (255, 255, 255), 2)
 

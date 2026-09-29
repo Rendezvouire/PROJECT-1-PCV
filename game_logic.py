@@ -17,7 +17,7 @@ class SimonSaysGame:
             self.score += 1
             is_correct = True
         else:
-            self.score = max(0, self.score - 1)
+            self.score = max(0, self.score - 3)
             is_correct = False
         
         self.generate_new_target()
