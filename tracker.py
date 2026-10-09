@@ -40,3 +40,10 @@ def get_zone_from_point(x, y, width, height):
         return "BL"
     else:
         return "BR"
+
+def get_menu_button_from_point(x, y, menu_buttons):
+    for button_key, button_info in menu_buttons.items():
+        x1, y1, x2, y2 = button_info["box"]
+        if x1 <= x <= x2 and y1 <= y <= y2:
+            return button_key
+    return None

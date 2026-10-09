@@ -4,6 +4,7 @@ lower_glove = np.array([35, 100, 100], dtype=np.uint8)
 upper_glove = np.array([85, 255, 255], dtype=np.uint8)
 
 dwell_time = 0.8
+HEADER_HEIGHT = 50
 
 zones_config = {
     "TL": {"text": "Yellow", "color": (0, 0, 255), "bg_name": "Red"},
@@ -13,3 +14,8 @@ zones_config = {
 }
 
 zone_keys = ["TL", "TR", "BL", "BR"]
+
+MENU_BUTTONS = {
+    "START": {"text": "Start Game", "color": (0, 180, 0), "box": (200, 180, 440, 250)},
+    "EXIT": {"text": "Exit", "color": (0, 0, 180), "box": (200, 280, 440, 350)}
+}
