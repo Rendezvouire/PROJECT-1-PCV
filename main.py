@@ -18,18 +18,21 @@ def main():
 
         frame = cv2.flip(frame, 1)
         h, w, _ = frame.shape
-        mid_x, mid_y = w // 2, h // 2
+        mid_x = w // 2
+        HEADER_HEIGHT = 50
+        game_height = h - HEADER_HEIGHT
+        mid_y = HEADER_HEIGHT + (game_height // 2)
 
         centroid, mask = hand_recognition(frame)
 
-        cv2.line(frame, (mid_x, 0), (mid_x, h), (255, 255, 255), 2)
+        cv2.line(frame, (mid_x, HEADER_HEIGHT), (mid_x, h), (255, 255, 255), 2)
         cv2.line(frame, (0, mid_y), (w, mid_y), (255, 255, 255), 2)
 
         zone_positions = {
-            "TL": (mid_x // 4, mid_y // 2),
-            "TR": (mid_x + mid_x // 4, mid_y // 2),
-            "BL": (mid_x // 4, mid_y + mid_y // 2),
-            "BR": (mid_x + mid_x // 4, mid_y + mid_y // 2)
+            "TL": (mid_x // 4, HEADER_HEIGHT + (game_height // 4)),
+            "TR": (mid_x + (mid_x // 4), HEADER_HEIGHT + (game_height // 4)),
+            "BL": (mid_x // 4, mid_y + (game_height // 4)),
+            "BR": (mid_x + (mid_x // 4), mid_y + (game_height // 4))
         }
 
         for zone_key, pos in zone_positions.items():

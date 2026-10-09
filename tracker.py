@@ -23,7 +23,15 @@ def hand_recognition(frame):
     return None, mask
 
 def get_zone_from_point(x, y, width, height):
-    mid_x, mid_y = width // 2, height // 2
+    HEADER_HEIGHT = 50
+    game_height = height - HEADER_HEIGHT
+
+    mid_x = width // 2
+    mid_y = HEADER_HEIGHT + (game_height // 2)
+
+    if y < HEADER_HEIGHT:
+        return None
+
     if x < mid_x and y < mid_y:
         return "TL"
     elif x >= mid_x and y < mid_y:
