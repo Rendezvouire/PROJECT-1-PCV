@@ -1,7 +1,7 @@
 import numpy as np
 
-lower_skin = np.array([0, 20, 70], dtype=np.uint8)
-upper_skin = np.array([20, 255, 255], dtype=np.uint8)
+lower_glove = np.array([35, 100, 100], dtype=np.uint8)
+upper_glove = np.array([85, 255, 255], dtype=np.uint8)
 
 dwell_time = 0.8
 

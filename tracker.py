@@ -1,21 +1,20 @@
 import cv2
 import numpy as np
-from config import lower_skin, upper_skin 
+from config import lower_glove, upper_glove 
 
 def hand_recognition(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, lower_skin, upper_skin)
+    mask = cv2.inRange(hsv, lower_glove, upper_glove)
 
     kernel = np.ones((5, 5), np.uint8)
-    mask = cv2.erode(mask, kernel, iterations=1)
-    mask = cv2.dilate(mask, kernel, iterations=2)
-    mask = cv2.GaussianBlur(mask, (5, 5), 0)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     if contours:
         largest_contour = max(contours, key=cv2.contourArea)
-        if cv2.contourArea(largest_contour) > 2000:
+        if cv2.contourArea(largest_contour) > 800:
             M = cv2.moments(largest_contour)
             if M["m00"] != 0:
                 cx = int(M["m10"] / M["m00"])

@@ -38,7 +38,7 @@ def main():
 
         cv2.rectangle(frame, (0, 0), (w, 50), (0, 0, 0), -1)
         cv2.putText(frame, game.get_instruction_text(), (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-        cv2.putText(frame, f"Skor: {game.score}", (w - 150, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+        cv2.putText(frame, f"Score: {game.score}", (w - 150, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
         if centroid:
             cx, cy = centroid
