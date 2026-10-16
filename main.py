@@ -1,6 +1,6 @@
 import cv2
 import time
-from config import zones_config, zone_keys, dwell_time, HEADER_HEIGHT, MENU_BUTTONS
+from config import zones_config, zone_keys, dwell_time, HEADER_HEIGHT, MENU_BUTTONS, ROUND_TIME_LIMIT
 from tracker import hand_recognition, get_zone_from_point, get_menu_button_from_point
 from game_logic import SimonSaysGame
 
@@ -36,9 +36,29 @@ def draw_menu(frame, menu_buttons):
         text_y = y1 + (button_h + text_h) // 2
         cv2.putText(frame, text, (text_x, text_y), font, button_font_scale, (255, 255, 255), button_font_thickness)
 
+def draw_game_over(frame):
+    h, w, _ = frame.shape
+    overlay = frame.copy()
+    cv2.rectangle(overlay, (0, 0), (w, h), (10, 10, 10), -1)
+    cv2.addWeighted(overlay, 0.8, frame, 0.2, 0, frame)
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    msg1 = "Game Over!"
+    (w1, h1), _ = cv2.getTextSize(msg1, font, 1.5, 3)
+    cv2.putText(frame, msg1, ((w - w1) // 2, h // 2 - 20), font, 1.5, (0, 0, 255), 3)
+
+    msg2 = "Try Again!"
+    (w2, h2), _ = cv2.getTextSize(msg2, font, 1.1, 2)
+    cv2.putText(frame, msg2, ((w - w2) // 2, h // 2 + 30), font, 1.1, (255, 255, 255), 2)
+
+    msg3 = "Hover anywhere or press ESC for Menu"
+    (w3, h3), _ = cv2.getTextSize(msg3, font, 0.6, 1)
+    cv2.putText(frame, msg3, ((w - w3) // 2, h // 2 + 80), font, 0.6, (200, 200, 200), 1)
+
 def main():
     cap = cv2.VideoCapture(0)
-    game = SimonSaysGame(zone_keys, zones_config)
+    game = SimonSaysGame(zone_keys, zones_config, time_limit=ROUND_TIME_LIMIT)
 
     game_state = "MENU"
     
@@ -64,7 +84,7 @@ def main():
 
                 detected_button = get_menu_button_from_point(cx, cy, MENU_BUTTONS)
 
-                if detected_button == current_target_zone and detected_button is not None:
+                if detected_button == current_hover_zone and detected_button is not None:
                     if dwell_start_time is not None:
                         elapsed = time.time() - dwell_start_time
                         angle = int((elapsed / dwell_time) * 360)
@@ -79,13 +99,20 @@ def main():
                                 break
                             dwell_start_time = None
                 else:
-                    current_target_zone = detected_button
+                    current_hover_zone = detected_button
                     dwell_start_time = time.time()
             else:
-                current_target_zone = None
+                current_hover_zone = None
                 dwell_start_time = None
 
         elif game_state == "PLAYING":
+            if game.is_time_up():
+                game_over = game.handle_time_up()
+                if game_over:
+                    game_state = "GAME_OVER"
+                    dwell_start_time = time.time()
+                    continue
+            
             game_height = h - HEADER_HEIGHT
             mid_x = w // 2
             mid_y = HEADER_HEIGHT + (game_height // 2)
@@ -120,9 +147,13 @@ def main():
                 
                 cv2.putText(frame, cfg["text"], (text_x, text_y), font, font_scale, color, font_thickness, cv2.LINE_AA)
 
-            cv2.rectangle(frame, (0, 0), (w, 50), (0, 0, 0), -1)
-            cv2.putText(frame, game.get_instruction_text(), (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
-            cv2.putText(frame, f"Score: {game.score}", (w - 150, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+            cv2.rectangle(frame, (0, 0), (w, HEADER_HEIGHT), (0, 0, 0), -1)
+            cv2.putText(frame, game.get_instruction_text(), (15, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (255, 255, 255), 2)
+
+            time_remaining = game.get_remaining_time()
+            timer_color = (0, 255, 0) if time_remaining <= 2.0 else (0, 255, 255)
+            cv2.putText(frame, f"Time: {time_remaining:.1f}s", (w - 280, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, timer_color, 2)
+            cv2.putText(frame, f"Score: {game.score}", (w - 130, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
             if centroid:
                 cx, cy = centroid
@@ -144,6 +175,27 @@ def main():
                     dwell_start_time = time.time()
             else:
                 current_hover_zone = None
+                dwell_start_time = None
+
+        elif game_state == "GAME_OVER":
+            draw_game_over(frame)
+
+            if centroid:
+                cx, cy = centroid
+                cv2.circle(frame, (cx, cy), 12, (0, 0, 255), -1)
+
+                if dwell_start_time is not None:
+                    elapsed = time.time() - dwell_start_time
+                    angle = int((elapsed / dwell_time) * 360)
+                    cv2.ellipse(frame, (cx, cy), (25, 25), 0, 0, min(angle, 360), (0, 255, 255), 3)
+
+                    if elapsed >= dwell_time:
+                        game_state = "PLAYING"
+                        game.start_new_game()
+                        dwell_start_time = None
+                else:
+                    dwell_start_time = time.time()
+            else:
                 dwell_start_time = None
 
         cv2.imshow("Hand Color Simon Says", frame)

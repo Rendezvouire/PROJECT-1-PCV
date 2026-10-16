@@ -4,6 +4,7 @@ lower_glove = np.array([35, 100, 100], dtype=np.uint8)
 upper_glove = np.array([85, 255, 255], dtype=np.uint8)
 
 dwell_time = 0.8
+ROUND_TIME_LIMIT = 5.0
 HEADER_HEIGHT = 50
 
 zones_config = {
