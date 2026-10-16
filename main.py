@@ -18,6 +18,13 @@ def draw_menu(frame, menu_buttons):
     title_x = (w - title_w) // 2
     cv2.putText(frame, title_text, (title_x, 100), font, font_scale, (255, 255, 255), font_thickness)
 
+    sub_text = "Use your mythical GREEN hand to play!"
+    sub_scale = 0.55
+    sub_thickness = 1
+    (sub_w, sub_h), _ = cv2.getTextSize(sub_text, font, sub_scale, sub_thickness)
+    sub_x = (w - sub_w) // 2
+    cv2.putText(frame, sub_text, (sub_x, 125), font, sub_scale, (200, 200, 200), sub_thickness, cv2.LINE_AA)
+
     for button_key, button_info in menu_buttons.items():
         x1, y1, x2, y2 = button_info["box"]
         color = button_info["color"]
@@ -52,7 +59,7 @@ def draw_game_over(frame):
     (w2, h2), _ = cv2.getTextSize(msg2, font, 1.1, 2)
     cv2.putText(frame, msg2, ((w - w2) // 2, h // 2 + 30), font, 1.1, (255, 255, 255), 2)
 
-    msg3 = "Hover anywhere or press ESC for Menu"
+    msg3 = "Hover anywhere with your mythical GREEN hand or press ESC for Menu"
     (w3, h3), _ = cv2.getTextSize(msg3, font, 0.6, 1)
     cv2.putText(frame, msg3, ((w - w3) // 2, h // 2 + 80), font, 0.6, (200, 200, 200), 1)
 
