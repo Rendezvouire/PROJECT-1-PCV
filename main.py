@@ -93,16 +93,32 @@ def main():
             cv2.line(frame, (mid_x, HEADER_HEIGHT), (mid_x, h), (255, 255, 255), 2)
             cv2.line(frame, (0, mid_y), (w, mid_y), (255, 255, 255), 2)
 
-            zone_positions = {
-                "TL": (mid_x // 4, HEADER_HEIGHT + (game_height // 4)),
-                "TR": (mid_x + (mid_x // 4), HEADER_HEIGHT + (game_height // 4)),
-                "BL": (mid_x // 4, mid_y + (game_height // 4)),
-                "BR": (mid_x + (mid_x // 4), mid_y + (game_height // 4))
+            zone_bounds = {
+                "TL": (0, HEADER_HEIGHT, mid_x, mid_y),
+                "TR": (mid_x, HEADER_HEIGHT, w, mid_y),
+                "BL": (0, mid_y, mid_x, h),
+                "BR": (mid_x, mid_y, w, h)
             }
 
-            for zone_key, pos in zone_positions.items():
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 1.2
+            font_thickness = 3
+
+            for zone_key, bounds in zone_bounds.items():
                 cfg = zones_config[zone_key]
-                cv2.putText(frame, cfg["text"], pos, cv2.FONT_HERSHEY_SIMPLEX, 1.2, cfg["color"], 3)
+                text = cfg["text"]
+                color = cfg["color"]
+
+                x1, y1, x2, y2 = bounds
+                zone_w = x2 - x1
+                zone_h = y2 - y1
+
+                (text_w, text_h), _ = cv2.getTextSize(text, font, font_scale, font_thickness)
+
+                text_x = x1 + (zone_w - text_w) // 2
+                text_y = y1 + (zone_h + text_h) // 2
+                
+                cv2.putText(frame, cfg["text"], (text_x, text_y), font, font_scale, color, font_thickness, cv2.LINE_AA)
 
             cv2.rectangle(frame, (0, 0), (w, 50), (0, 0, 0), -1)
             cv2.putText(frame, game.get_instruction_text(), (20, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
