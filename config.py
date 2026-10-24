@@ -6,7 +6,7 @@ UPPER_GLOVE = np.array([85, 255, 255], dtype=np.uint8)
 DWELL_TIME = 0.8
 ROUND_TIME_LIMIT = 5.0
 HEADER_HEIGHT = 50
-DELAY_TIME = 1.5
+DELAY_TIME = 0.8
 
 zones_config = {
     "TL": {"text": "Yellow", "color": (0, 0, 255), "ink_name": "Red"},
