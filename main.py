@@ -3,6 +3,7 @@ import time
 from config import zones_config, zone_keys, dwell_time, HEADER_HEIGHT, MENU_BUTTONS, ROUND_TIME_LIMIT
 from tracker import hand_recognition, get_zone_from_point, get_menu_button_from_point
 from game_logic import SimonSaysGame
+DELAY_TIME = 1.5
 
 def draw_menu(frame, menu_buttons):
     h, w, _ = frame.shape
@@ -56,6 +57,26 @@ def draw_game_over(frame):
     cv2.putText(frame, msg1, ((w - w1) // 2, h // 2 - 20), font, 1.5, (0, 0, 255), 3)
 
     msg2 = "Try Again!"
+    (w2, h2), _ = cv2.getTextSize(msg2, font, 1.1, 2)
+    cv2.putText(frame, msg2, ((w - w2) // 2, h // 2 + 30), font, 1.1, (255, 255, 255), 2)
+
+    msg3 = "Hover anywhere with your mythical GREEN hand or press ESC for Menu"
+    (w3, h3), _ = cv2.getTextSize(msg3, font, 0.6, 1)
+    cv2.putText(frame, msg3, ((w - w3) // 2, h // 2 + 80), font, 0.6, (200, 200, 200), 1)
+
+def draw_you_win(frame):
+    h, w, _ = frame.shape
+    overlay = frame.copy()
+    cv2.rectangle(overlay, (0, 0), (w, h), (10, 30, 10), -1)
+    cv2.addWeighted(overlay, 0.8, frame, 0.2, 0, frame)
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    msg1 = "You Win!"
+    (w1, h1), _ = cv2.getTextSize(msg1, font, 1.6, 3)
+    cv2.putText(frame, msg1, ((w - w1) // 2, h // 2 - 20), font, 1.6, (0, 255, 0), 3)
+
+    msg2 = "Congratulations!"
     (w2, h2), _ = cv2.getTextSize(msg2, font, 1.1, 2)
     cv2.putText(frame, msg2, ((w - w2) // 2, h // 2 + 30), font, 1.1, (255, 255, 255), 2)
 
@@ -175,13 +196,43 @@ def main():
                         cv2.ellipse(frame, (cx, cy), (25, 25), 0, 0, min(angle, 360), (0, 255, 255), 3)
 
                         if elapsed >= dwell_time:
-                            game.check_answer(detected_zone)
+                            is_correct, status = game.check_answer(detected_zone)
+                            
+                            if status == "You Win!":
+                                game_state = "YOU_WIN"
+                            elif status == "You Lose!":
+                                game_state = "GAME_OVER"
                             dwell_start_time = None
+                                            
                 else:
                     current_hover_zone = detected_zone
                     dwell_start_time = time.time()
             else:
                 current_hover_zone = None
+                dwell_start_time = None
+
+        elif game_state == "YOU_WIN":
+            draw_you_win(frame)
+
+            if centroid:
+                cx, cy = centroid
+                cv2.circle(frame, (cx, cy), 12, (0, 255, 0), -1)
+
+                if dwell_start_time is not None:
+                    elapsed = time.time() - dwell_start_time
+
+                    if elapsed >= DELAY_TIME:
+                        hover_time = elapsed - DELAY_TIME
+                        angle = int((hover_time / dwell_time) * 360)
+                        cv2.ellipse(frame, (cx, cy), (25, 25), 0, 0, min(angle, 360), (0, 255, 255), 3)
+
+                        if hover_time >= dwell_time:
+                            game_state = "PLAYING"
+                            game.start_new_game()
+                            dwell_start_time = None
+                else:
+                    dwell_start_time = time.time()
+            else:
                 dwell_start_time = None
 
         elif game_state == "GAME_OVER":
@@ -193,13 +244,16 @@ def main():
 
                 if dwell_start_time is not None:
                     elapsed = time.time() - dwell_start_time
-                    angle = int((elapsed / dwell_time) * 360)
-                    cv2.ellipse(frame, (cx, cy), (25, 25), 0, 0, min(angle, 360), (0, 255, 255), 3)
 
-                    if elapsed >= dwell_time:
-                        game_state = "PLAYING"
-                        game.start_new_game()
-                        dwell_start_time = None
+                    if elapsed >= DELAY_TIME:
+                        hover_time = elapsed - DELAY_TIME
+                        angle = int((hover_time / dwell_time) * 360)
+                        cv2.ellipse(frame, (cx, cy), (25, 25), 0, 0, min(angle, 360), (0, 255, 255), 3)
+
+                        if hover_time >= dwell_time:
+                            game_state = "PLAYING"
+                            game.start_new_game()
+                            dwell_start_time = None
                 else:
                     dwell_start_time = time.time()
             else:

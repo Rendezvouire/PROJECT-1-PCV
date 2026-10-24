@@ -6,10 +6,12 @@ class SimonSaysGame:
         self.zone_keys = zone_keys
         self.zones_config = zones_config
         self.time_limit = time_limit
+        self.win_score = 10
         
         self.score = 0
-        self.target_zone = random.choice(self.zone_keys)
-        self.target_type = random.choice(["TEXT", "INK"])
+        self.target_zone = None
+        self.target_type = None
+        self.round_start_time = None
     
     def start_new_game(self):
         self.score = 0
@@ -32,25 +34,28 @@ class SimonSaysGame:
     def check_answer(self, selected_zone):
         if selected_zone == self.target_zone:
             self.score += 1
+            if self.score >= self.win_score:
+                return True, "You Win!"
+            
             self.generate_new_target()
-            return True, False
+            return True, "Replay"
         else:
-            self.score -= 5
+            self.score -= 3
             if self.score <= 0:
                 self.score = 0
-                return False, True
+                return False, "You Lose!"
             else: 
                 self.generate_new_target()
-                return False, False
+                return False, "Try Again"
         
     def handle_time_up(self):
         self.score -= 5
         if self.score <= 0:
             self.score = 0
-            return True
+            return True, "You Lose!"
         else:
             self.generate_new_target()
-            return False
+            return False, "Try Again"
 
     def get_instruction_text(self):
         if self.target_type == "TEXT":
