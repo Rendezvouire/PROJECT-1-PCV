@@ -61,4 +61,4 @@ class SimonSaysGame:
         if self.target_type == "TEXT":
             return f"Touch the text: '{self.zones_config[self.target_zone]['text']}'"
         else:
-            return f"Touch the color: '{self.zones_config[self.target_zone]['bg_name']}'"
+            return f"Touch the color: '{self.zones_config[self.target_zone]['ink_name']}'"

@@ -1,10 +1,10 @@
 import cv2
 import numpy as np
-from config import lower_glove, upper_glove 
+from config import LOWER_GLOVE, UPPER_GLOVE, HEADER_HEIGHT 
 
 def hand_recognition(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, lower_glove, upper_glove)
+    mask = cv2.inRange(hsv, LOWER_GLOVE, UPPER_GLOVE)
 
     kernel = np.ones((5, 5), np.uint8)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
@@ -23,7 +23,6 @@ def hand_recognition(frame):
     return None, mask
 
 def get_zone_from_point(x, y, width, height):
-    HEADER_HEIGHT = 50
     game_height = height - HEADER_HEIGHT
 
     mid_x = width // 2
