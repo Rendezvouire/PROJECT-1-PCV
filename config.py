@@ -2,6 +2,12 @@ import numpy as np
 
 LOWER_GLOVE = np.array([35, 100, 100], dtype=np.uint8)
 UPPER_GLOVE = np.array([85, 255, 255], dtype=np.uint8)
+CALIBRATION_FILE = "hsv_calibration.json"
+
+BLUR_KERNEL_SIZE = 7
+MORPH_KERNEL_SIZE = 5
+MIN_CONTOUR_AREA = 800
+SMOOTHING_ALPHA = 0.4
 
 DWELL_TIME = 0.8
 ROUND_TIME_LIMIT = 5.0

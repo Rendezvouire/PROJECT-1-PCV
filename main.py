@@ -1,7 +1,7 @@
 import cv2
 import time
 from config import zones_config, zone_keys, DWELL_TIME, MENU_BUTTONS, ROUND_TIME_LIMIT, DELAY_TIME
-from tracker import hand_recognition, get_zone_from_point, get_menu_button_from_point
+from tracker import HandTracker, get_zone_from_point, get_menu_button_from_point
 from game_logic import SimonSaysGame
 import ui
 
@@ -12,6 +12,8 @@ def main():
         return
 
     game = SimonSaysGame(zone_keys, zones_config, time_limit=ROUND_TIME_LIMIT)
+    tracker = HandTracker()
+    debug_mode = False
 
     game_state = "MENU"
     dwell_start_time = None
@@ -25,7 +27,10 @@ def main():
 
         frame = cv2.flip(frame, 1)
         h, w, _ = frame.shape
-        centroid, _ = hand_recognition(frame)
+        tracker.update_from_trackbars()
+        centroid, _ = tracker.detect(frame)
+        if debug_mode or tracker.calibrating:
+            tracker.show_debug(frame)
 
         if game_state == "MENU":
             ui.draw_menu(frame, MENU_BUTTONS)
@@ -123,6 +128,16 @@ def main():
             game_state = "MENU"
             current_hover_zone = None
             dwell_start_time = None
+        elif key == ord('d'):
+            debug_mode = not debug_mode
+            if not debug_mode and not tracker.calibrating:
+                tracker.hide_debug()
+        elif key == ord('c'):
+            tracker.toggle_calibration()
+            if not tracker.calibrating and not debug_mode:
+                tracker.hide_debug()
+        elif key == ord('s'):
+            tracker.save_calibration()
 
     cap.release()
     cv2.destroyAllWindows()
