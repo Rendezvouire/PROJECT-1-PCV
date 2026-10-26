@@ -67,7 +67,7 @@ def main():
                     dwell_start_time = time.time()
                     continue
 
-            ui.draw_playing(frame, game, zones_config)
+            ui.draw_playing(frame, game)
 
             if centroid:
                 cx, cy = centroid

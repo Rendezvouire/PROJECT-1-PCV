@@ -8,6 +8,9 @@ class SimonSaysGame:
         self.time_limit = time_limit
         self.win_score = 10
         self.max_lives = max_lives
+
+        self.palette = {cfg["ink_name"]: cfg["color"] for cfg in zones_config.values()}
+        self.layout = dict(zones_config)
         
         self.score = 0
         self.lives = max_lives
@@ -20,7 +23,21 @@ class SimonSaysGame:
         self.lives = self.max_lives
         self.generate_new_target()
 
+    def shuffle_layout(self):
+        ink_names = list(self.palette.keys())
+        random.shuffle(ink_names)
+
+        text_names = ink_names[:]
+        while any(t == i for t, i in zip(text_names, ink_names)):
+            random.shuffle(text_names)
+
+        self.layout = {
+            zone: {"text": text, "color": self.palette[ink], "ink_name": ink}
+            for zone, text, ink in zip(self.zone_keys, text_names, ink_names)
+        }
+
     def generate_new_target(self):
+        self.shuffle_layout()
         self.target_zone = random.choice(self.zone_keys)
         self.target_type = random.choice(["TEXT", "INK"])
         self.round_start_time = time.time()
@@ -61,6 +78,6 @@ class SimonSaysGame:
 
     def get_instruction_text(self):
         if self.target_type == "TEXT":
-            return f"Touch the text: '{self.zones_config[self.target_zone]['text']}'"
+            return f"Touch the text: '{self.layout[self.target_zone]['text']}'"
         else:
-            return f"Touch the color: '{self.zones_config[self.target_zone]['ink_name']}'"
+            return f"Touch the color: '{self.layout[self.target_zone]['ink_name']}'"

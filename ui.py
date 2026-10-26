@@ -41,7 +41,6 @@ def draw_cursor(frame, centroid, color=GREEN):
     cv2.circle(frame, centroid, 12, color, -1)
 
 def draw_dwell_progress(frame, centroid, progress):
-    """progress: 0.0 - 1.0"""
     angle = int(min(max(progress, 0.0), 1.0) * 360)
     cv2.ellipse(frame, centroid, (25, 25), 0, 0, angle, YELLOW, 3)
 
@@ -95,7 +94,7 @@ def draw_header(frame, game):
     cv2.putText(frame, f"Score: {game.score}", (w - 130, 35), FONT, 0.7, YELLOW, 2)
     draw_lives(frame, game.lives, game.max_lives, w - 375, HEADER_HEIGHT // 2)
 
-def draw_playing(frame, game, zones_config):
+def draw_playing(frame, game):
     h, w, _ = frame.shape
     zone_bounds = get_zone_bounds(w, h)
 
@@ -105,7 +104,7 @@ def draw_playing(frame, game, zones_config):
     cv2.line(frame, (0, mid_y), (w, mid_y), WHITE, 2)
 
     for zone_key, box in zone_bounds.items():
-        cfg = zones_config[zone_key]
+        cfg = game.layout[zone_key]
         draw_text_in_box(frame, cfg["text"], box, 1.2, cfg["color"], 3, cv2.LINE_AA)
 
     draw_header(frame, game)
