@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 from config import HEADER_HEIGHT
 
 FONT = cv2.FONT_HERSHEY_SIMPLEX
@@ -58,6 +59,31 @@ def draw_menu(frame, menu_buttons):
         cv2.rectangle(frame, (x1, y1), (x2, y2), WHITE, 2)
         draw_text_in_box(frame, button_info["text"], button_info["box"], 0.9, WHITE, 2)
 
+def draw_heart(frame, center, size, filled):
+    cx, cy = center
+    r = size // 4
+    color = (60, 60, 230) if filled else (90, 90, 90)
+    thickness = -1 if filled else 2
+
+    pts = np.array([[cx - 2 * r + 1, cy + r // 2],
+                    [cx + 2 * r - 1, cy + r // 2],
+                    [cx, cy + 2 * r + r // 2]], np.int32)
+    
+    if filled:
+        cv2.circle(frame, (cx - r, cy), r, color, -1, cv2.LINE_AA)
+        cv2.circle(frame, (cx + r, cy), r, color, -1, cv2.LINE_AA)
+        cv2.fillPoly(frame, [pts], color, cv2.LINE_AA)
+    else:
+        cv2.ellipse(frame, (cx - r, cy), (r, r), 0, 150, 360, color, thickness, cv2.LINE_AA)
+        cv2.ellipse(frame, (cx + r, cy), (r, r), 0, 180, 390, color, thickness, cv2.LINE_AA)
+        cv2.line(frame, (cx - 2 * r + 1, cy + r // 2), (cx, cy + 2 * r + r // 2), color, thickness, cv2.LINE_AA)
+        cv2.line(frame, (cx + 2 * r - 1, cy + r // 2), (cx, cy + 2 * r + r // 2), color, thickness, cv2.LINE_AA)
+
+def draw_lives(frame, lives, max_lives, start_x, center_y, size=20, gap=8):
+    for i in range(max_lives):
+        cx = start_x + i * (size + gap) + size // 2
+        draw_heart(frame, (cx, center_y - size // 4), size, filled=(i < lives))
+
 def draw_header(frame, game):
     h, w, _ = frame.shape
     cv2.rectangle(frame, (0, 0), (w, HEADER_HEIGHT), (0, 0, 0), -1)
@@ -67,6 +93,7 @@ def draw_header(frame, game):
     timer_color = RED if time_remaining <= 2.0 else YELLOW
     cv2.putText(frame, f"Time: {time_remaining:.1f}s", (w - 280, 35), FONT, 0.7, timer_color, 2)
     cv2.putText(frame, f"Score: {game.score}", (w - 130, 35), FONT, 0.7, YELLOW, 2)
+    draw_lives(frame, game.lives, game.max_lives, w - 375, HEADER_HEIGHT // 2)
 
 def draw_playing(frame, game, zones_config):
     h, w, _ = frame.shape

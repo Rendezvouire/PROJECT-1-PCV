@@ -2,19 +2,22 @@ import random
 import time
 
 class SimonSaysGame:
-    def __init__(self, zone_keys, zones_config, time_limit=5.0):
+    def __init__(self, zone_keys, zones_config, time_limit=5.0, max_lives=3):
         self.zone_keys = zone_keys
         self.zones_config = zones_config
         self.time_limit = time_limit
         self.win_score = 10
+        self.max_lives = max_lives
         
         self.score = 0
+        self.lives = max_lives
         self.target_zone = None
         self.target_type = None
         self.round_start_time = None
     
     def start_new_game(self):
         self.score = 0
+        self.lives = self.max_lives
         self.generate_new_target()
 
     def generate_new_target(self):
@@ -31,31 +34,30 @@ class SimonSaysGame:
     def is_time_up(self):
         return self.get_remaining_time() <= 0
 
+    def lose_life(self):
+        self.lives -= 1
+        if self.lives <= 0:
+            self.lives = 0
+            return True
+        self.generate_new_target()
+        return False
+
     def check_answer(self, selected_zone):
         if selected_zone == self.target_zone:
             self.score += 1
             if self.score >= self.win_score:
                 return True, "You Win!"
-            
             self.generate_new_target()
             return True, "Replay"
-        else:
-            self.score -= 3
-            if self.score <= 0:
-                self.score = 0
-                return False, "You Lose!"
-            else: 
-                self.generate_new_target()
-                return False, "Try Again"
+        
+        if self.lose_life():
+            return False, "You Lose!"
+        return False, "Try Again"
         
     def handle_time_up(self):
-        self.score -= 5
-        if self.score <= 0:
-            self.score = 0
+        if self.lose_life():
             return True, "You Lose!"
-        else:
-            self.generate_new_target()
-            return False, "Try Again"
+        return False, "Try Again"
 
     def get_instruction_text(self):
         if self.target_type == "TEXT":
